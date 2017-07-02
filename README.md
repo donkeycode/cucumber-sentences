@@ -4,7 +4,7 @@ This gem is a collection of pre-built sentences compatible with cucumber and pag
 
 ## Setup
 
-Require in your `Gemfile``
+Require in your `Gemfile`
 
 `````
 gem "cucumber-sentences"
