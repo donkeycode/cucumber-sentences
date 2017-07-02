@@ -2,7 +2,7 @@ $:.push File.expand_path("../lib", __FILE__)
 
 Gem::Specification.new do |s|
   s.name        = 'cucumber-sentences'
-  s.version     = '0.0.5'
+  s.version     = '0.0.7'
   s.license     = 'MIT'
   s.summary     = "Pre-built sentences for your cucumber tests"
   s.description = "Pre-built sentences for your cucumber tests"

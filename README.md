@@ -13,7 +13,7 @@ gem "cucumber-sentences"
 Add in your `features/step_definitions/imports.rb`
 
 ````
-ENV.CUCUMBER_ROOT = File.absolute_path('../', File.dirname(__FILE__));
+ENV['CUCUMBER_ROOT'] = File.absolute_path('../', File.dirname(__FILE__));
 require "cucumber-sentences"
 `````
 

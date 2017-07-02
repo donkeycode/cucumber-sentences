@@ -10,7 +10,7 @@ end
 
 
 Given(/^I change the domain to "([^"]*)"$/) do | domain_name |
-    require File.join(ENV.CUCUMBER_ROOT,'support/helpers/domain')
+    require File.join(ENV['CUCUMBER_ROOT'],'support/helpers/domain')
     domain = Domain.get(domain_name)
 
     unless domain
@@ -21,7 +21,7 @@ Given(/^I change the domain to "([^"]*)"$/) do | domain_name |
 end
 
 Given(/^I am on the "([^"]*)" of (.+) "([^"]*)"$/) do | page_name, type, identifier |
-    require File.join(ENV.CUCUMBER_ROOT, 'support/helpers/'+ type)
+    require File.join(ENV['CUCUMBER_ROOT'], 'support/helpers/'+ type)
     typeClassName = type.sub(/^(\w)/) {|s| s.capitalize}
 
     clazz = Object.const_get(typeClassName)
@@ -77,6 +77,34 @@ Then(/^I should be redirected on "([^"]*)"$/) do | page_name |
         if nb_retry < 30
             nb_retry = nb_retry + 1
 
+            sleep 1
+            retry
+        else
+            raise
+        end
+    end
+end
+
+Then(/^I should not see the button "([^"]*)"$/) do | dom_element_name |
+    @current_page.get_button(dom_element_name).when_not_present()
+end
+
+Then(/^I should not see the element "([^"]*)"$/) do | dom_element_name |
+    @current_page.get_element_by_name(dom_element_name).when_not_present()
+end
+
+Then(/^I should not see the field "([^"]*)"$/) do | dom_element_name |
+    @current_page.get_field(dom_element_name).when_not_present()
+end
+
+Then(/^I should see a message tell me "([^"]*)"$/) do | text |
+    nb_retry = 0
+
+    begin
+        expect(@current_page.text).to include(Fakable.fake_if_needed(text))
+    rescue RSpec::Expectations::ExpectationNotMetError
+        if nb_retry < 30
+            nb_retry = nb_retry + 1
             sleep 1
             retry
         else
