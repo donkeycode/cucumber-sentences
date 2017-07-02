@@ -10,7 +10,7 @@ end
 
 
 Given(/^I change the domain to "([^"]*)"$/) do | domain_name |
-    require File.join(File.absolute_path('../', File.dirname(__FILE__)), 'support/helpers/domain')
+    require File.join(ENV.CUCUMBER_ROOT,'support/helpers/domain')
     domain = Domain.get(domain_name)
 
     unless domain
@@ -21,7 +21,7 @@ Given(/^I change the domain to "([^"]*)"$/) do | domain_name |
 end
 
 Given(/^I am on the "([^"]*)" of (.+) "([^"]*)"$/) do | page_name, type, identifier |
-    require File.join(File.absolute_path('../', File.dirname(__FILE__)), 'support/helpers/'+ type )
+    require File.join(ENV.CUCUMBER_ROOT, 'support/helpers/'+ type)
     typeClassName = type.sub(/^(\w)/) {|s| s.capitalize}
 
     clazz = Object.const_get(typeClassName)
