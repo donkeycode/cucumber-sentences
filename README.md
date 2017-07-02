@@ -17,3 +17,9 @@ require "cucumber-sentences"
 `````
 
 That's all !
+
+## Sentences included
+
+### Pages manipulation
+
+- Given I am on the "([^"]*)"
