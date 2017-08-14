@@ -112,3 +112,304 @@ Then(/^I should see a message tell me "([^"]*)"$/) do | text |
         end
     end
 end
+
+
+Given(/^I fill "([^"]*)" autocomplete with "([^"]*)"$/) do |field, value|
+    @current_page.get_field(field).when_visible().value = Fakable.fake_if_needed(value)
+
+    sleep 2
+
+    @current_page.get_field("selected_autocomplete").when_visible().click()
+end
+
+Given(/^I can see the value "([^"]*)" selected in the select box "([^"]*)"$/) do |value, field|
+    nb_retry = 0
+
+    begin
+        expect(@current_page.get_field(field).when_visible().selected_options()).to include(value)
+    rescue Watir::Exception::NoValueFoundException
+        if nb_retry < 30
+            nb_retry = nb_retry + 1
+
+            sleep 1
+            retry
+        else
+            raise
+        end
+    end
+
+end
+
+Given(/^I fill "([^"]*)" datepicker with "([^"]*)"$/) do |field, value|
+    nb_retry = 0
+    begin
+        @current_page.get_field(field).when_visible().value = Fakable.fake_if_needed(value)
+    rescue Watir::Wait::TimeoutError
+        # Do not add sleep more, just retry, it's already a timeout error (from when_visible method)
+        if nb_retry < 5
+            nb_retry = nb_retry + 1
+            retry
+        else
+            raise
+        end
+    rescue Exception => ex
+        puts "An error of type #{ex.class} happened, message is #{ex.message}"
+        if nb_retry < 30
+            nb_retry = nb_retry + 1
+            sleep 1
+            retry
+        else
+            raise
+        end
+    end
+    js  = 'let calendars = document.getElementsByClassName("show-calendar");';
+    js += 'for(let idx=0; idx < calendars.length; idx++) {';
+    js += '  calendars[idx].removeAttribute("style");';
+    js += '  calendars[idx].classList.remove("show-calendar");';
+    js += '}';
+    @browser.execute_script js
+end
+
+When(/^I click on the button "([^"]*)"$/) do | button |
+    if not @current_page.get_button(button)
+        throw "Button #{button} not found"
+    end
+
+    @current_page.get_button(button).when_visible().wait_until do
+        not @current_page.get_button(button).disabled?
+    end
+
+    @current_page.get_button(button).click()
+end
+
+Given(/^I try visit the page "([^"]*)" of ([^"]*) "([^"]*)"$/) do | page_name, type, identifier |
+    require File.join(File.absolute_path('../', File.dirname(__FILE__)), 'support/helpers/'+ type )
+    typeClassName = type.sub(/^(\w)/) {|s| s.capitalize}
+
+    clazz = Object.const_get(typeClassName)
+    object = clazz.get(identifier)
+    object['site_url'] = $site_url
+
+    unless object
+        throw "Object #{type} with id #{identifier} not found !"
+    end
+
+    visit_page page_name.gsub(" ","_"), :using_params => object
+end
+
+Then(/^I can see "([^"]*)" in element "([^"]*)"(| exactly)$/) do | text, dom_element_name, exactly |
+    nb_retry = 0
+
+    begin
+        if exactly == ' exactly'
+            expect(@current_page.get_element_by_name(dom_element_name).when_visible().text).to eq(text)
+        end
+        expect(@current_page.get_element_by_name(dom_element_name).when_visible().text.downcase).to include(text.downcase)
+    rescue RSpec::Expectations::ExpectationNotMetError
+        if nb_retry < 30
+            nb_retry = nb_retry + 1
+            sleep 1
+            retry
+        else
+            raise
+        end
+    rescue Watir::Wait::TimeoutError
+        # Do not wait more, just retry, it's already a timeout error (from when_visible method)
+        if nb_retry < 5
+            nb_retry = nb_retry + 1
+            sleep 1
+            retry
+        else
+            raise
+        end
+    rescue Exception => ex
+        puts "An error of type #{ex.class} happened, message is #{ex.message}"
+        if nb_retry < 30
+            nb_retry = nb_retry + 1
+            sleep 1
+            retry
+        else
+            raise
+        end
+    end
+end
+
+Then(/^I can see "([^"]*)" in input "([^"]*)"$/) do | value, input |
+    expect(@current_page.get_field(input).when_visible().value).to include(value)
+end
+
+Then(/^I should not see a message tell me "([^"]*)"$/) do | text |
+    sleep 2
+
+    expect(@current_page.text).not_to include(Fakable.fake_if_needed(text))
+end
+
+Then(/^I should see the (button|field|element) "([^"]*)"(| disabled)$/) do | element_type, dom_element_name, modifier |
+    nb_retry = 0
+
+    begin
+        if element_type == 'button'
+            if modifier == ' disabled'
+                expect(@current_page.get_button(dom_element_name).when_visible.enabled?).to be false
+            else
+                expect(@current_page.get_button(dom_element_name).visible?).to be true
+            end
+        end
+        if element_type == 'field'
+            expect(@current_page.get_field(dom_element_name).visible?).to be true
+        end
+        if element_type == 'element'
+            expect(@current_page.get_element_by_name(dom_element_name).visible?).to be true
+        end
+    rescue RSpec::Expectations::ExpectationNotMetError
+        if nb_retry < 30
+            nb_retry = nb_retry + 1
+
+            sleep 1
+            retry
+        else
+            raise
+        end
+    end
+end
+
+Given(/^I fill "([^"]*)" ckeditor field with "([^"]*)"$/) do |field, value|
+    nb_retry = 0
+    begin
+        jslist = "return Object.keys(CKEDITOR.instances);"
+        puts @browser.execute_script jslist
+        js = "CKEDITOR.instances." + @current_page.get_ckeditor(field)  + ".setData(\"" + value + "\");";
+        @browser.execute_script js
+        js = "CKEDITOR.instances." + @current_page.get_ckeditor(field)  + ".fire(\"change\");";
+        @browser.execute_script js
+        step "I can see \"#{value}\" in ckeditor \"#{field}\""
+
+    rescue RSpec::Expectations::ExpectationNotMetError
+        if nb_retry < 30
+            nb_retry = nb_retry + 1
+
+            sleep 1
+            retry
+        else
+            raise
+        end
+    end
+end
+
+Given(/^I can see "([^"]*)" in ckeditor "([^"]*)"$/) do |value, field|
+    nb_retry = 0
+    begin
+        js2 = "return CKEDITOR.instances." + @current_page.get_ckeditor(field);
+        # js2  = "if (!CKEDITOR.instances." + @current_page.get_ckeditor(field)  + ".document) {"
+        # js2 += "    return CKEDITOR.instances." + @current_page.get_ckeditor(field) + ";";
+        # js2 += "}";
+
+        puts js2
+
+        js  = "if (!CKEDITOR.instances." + @current_page.get_ckeditor(field)  + ".document) {"
+        js += "    return CKEDITOR.instances." + @current_page.get_ckeditor(field)  + ".getData();";
+        js += "}";
+        js += "return CKEDITOR.instances." + @current_page.get_ckeditor(field)  + ".document.getBody().getText();";
+
+        ckEditorText = @browser.execute_script js
+        expect(ckEditorText).to include(value)
+
+    rescue RSpec::Expectations::ExpectationNotMetError
+        if nb_retry < 30
+            nb_retry = nb_retry + 1
+
+            sleep 1
+            retry
+        else
+            raise
+        end
+    end
+end
+
+Given(/^I refresh the page$/) do
+    @browser.driver.navigate().refresh()
+end
+
+Given(/^I wait ([^"]*) seconds$/) do |value|
+    sleep value.to_i
+end
+
+When(/^I scroll to "([^"]*)"$/) do |elementClass|
+    @current_page.get_element_by_name(elementClass).when_visible().scroll_into_view
+end
+
+Then(/^I can not see "([^"]*)" in element "([^"]*)"$/) do | text, dom_element_name |
+    nb_retry = 0
+    begin
+        expect(@current_page.get_element_by_name(dom_element_name).when_visible().text).not_to include(text)
+    rescue RSpec::Expectations::ExpectationNotMetError
+        if nb_retry < 30
+            nb_retry = nb_retry + 1
+
+            sleep 1
+            retry
+        else
+            raise
+        end
+    end
+end
+
+When(/^I upload a file with the filename "([^"]*)" in element "([^"]*)"$/) do |path, dropzone|
+    nb_retry = 0
+    begin
+        dz = @current_page.get_field(dropzone)
+        dz = dz.set(File.join(File.absolute_path('../', File.dirname(__FILE__)), 'support/files/' + path))
+    rescue Watir::Exception::UnknownObjectException
+        if nb_retry < 30
+            nb_retry = nb_retry + 1
+
+            sleep 1
+            retry
+        else
+            raise
+        end
+    end
+end
+
+When(/^I hover over the element "([^"]*)"$/) do |element|
+
+    nb_retry = 0
+    begin
+        @browser.driver.action.move_to(@current_page.get_element_by_name(element).wd).perform
+    rescue
+        if nb_retry < 30
+            nb_retry = nb_retry + 1
+
+            sleep 1
+            retry
+        else
+            raise
+        end
+    end
+end
+
+
+Given(/^I make one pause$/) do
+    sleep 5
+end
+
+Given(/^I fill "([^"]*)" contenteditable with "([^"]*)"$/) do |field, value|
+    @current_page.get_field(field).when_visible().send_keys(Fakable.fake_if_needed(value))
+end
+
+Given(/^I fill "([^"]*)" js field with "([^"]*)"$/) do |field, value|
+    selector = @current_page.get_js_selector(field);
+    js = "document.querySelector('"+selector+"').value = '" +Fakable.fake_if_needed(value)+"'; document.querySelector('"+selector+"').dispatchEvent(new Event('change'));" 
+    @browser.execute_script js
+end
+
+## Mail hog
+Then(/^I see the last email subject "([^"]*)"$/) do |subject|
+    step 'I can see "'+subject+'" in element "last-message-subject"'
+end
+
+When(/^I open on the last email link$/) do
+    @browser.execute_script "document.querySelector('.msglist-message .subject').click();";
+    sleep 1
+    @browser.execute_script "document.location.href= jQuery(document.querySelector('iframe').attributes.srcdoc.value).find('a').attr('href')"
+end
