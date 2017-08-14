@@ -183,7 +183,7 @@ When(/^I click on the button "([^"]*)"$/) do | button |
 end
 
 Given(/^I try visit the page "([^"]*)" of ([^"]*) "([^"]*)"$/) do | page_name, type, identifier |
-    require File.join(File.absolute_path('../', File.dirname(__FILE__)), 'support/helpers/'+ type )
+    require File.join(ENV['CUCUMBER_ROOT'], 'support/helpers/'+ type )
     typeClassName = type.sub(/^(\w)/) {|s| s.capitalize}
 
     clazz = Object.const_get(typeClassName)
@@ -358,7 +358,7 @@ When(/^I upload a file with the filename "([^"]*)" in element "([^"]*)"$/) do |p
     nb_retry = 0
     begin
         dz = @current_page.get_field(dropzone)
-        dz = dz.set(File.join(File.absolute_path('../', File.dirname(__FILE__)), 'support/files/' + path))
+        dz = dz.set(File.join(ENV['CUCUMBER_ROOT'], 'support/files/' + path))
     rescue Watir::Exception::UnknownObjectException
         if nb_retry < 30
             nb_retry = nb_retry + 1
