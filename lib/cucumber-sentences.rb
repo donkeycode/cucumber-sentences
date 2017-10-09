@@ -43,7 +43,19 @@ end
 
 
 Then(/^I should see field "([^"]*)" filled "([^"]*)"$/) do |field, value|
-    expect(@current_page.get_field(field).when_visible().value).to include(Fakable.fake_if_needed(value))
+    nb_retry = 0
+
+    begin
+        expect(@current_page.get_field(field).when_visible().value).to include(Fakable.fake_if_needed(value))
+    rescue RSpec::Expectations::ExpectationNotMetError
+        if nb_retry < 30
+            nb_retry = nb_retry + 1
+            sleep 1
+            retry
+        else
+            raise
+        end
+    end
 end
 
 Given(/^I click on the select box "([^"]*)" to select "([^"]*)"$/) do |field, value|
@@ -412,4 +424,68 @@ When(/^I open on the last email link$/) do
     @browser.execute_script "document.querySelector('.msglist-message .subject').click();";
     sleep 1
     @browser.execute_script "document.location.href= jQuery(document.querySelector('iframe').attributes.srcdoc.value).find('a').attr('href')"
+end
+
+dateCurrent = Time.new
+
+When(/^I force scroll to "([^"]*)"$/) do |elementClass|
+    selector = @current_page.get_js_selector(elementClass)
+    js = "document.getElementById('"+selector+"').scrollIntoView();"
+    @browser.execute_script js
+end
+
+Given(/^I fill "([^"]*)" field with date$/) do |field|
+    @current_page.get_field(field).when_visible().value = dateCurrent.strftime("%Y-%m-%d")
+end
+
+Then(/^I should see field "([^"]*)" filled date$/) do |field|
+    nb_retry = 0
+
+    begin        
+        expect(@current_page.get_field(field).when_visible().value).to eq(dateCurrent.strftime("%Y-%m-%d"))
+    rescue RSpec::Expectations::ExpectationNotMetError
+        if nb_retry < 30
+            nb_retry = nb_retry + 1
+            sleep 1
+            retry
+        else
+            raise
+        end
+    end
+end
+
+Given(/^I fill "([^"]*)" field with time$/) do |field|
+    @current_page.get_field(field).when_visible().value = dateCurrent.strftime("%H:%M")
+end
+
+Then(/^I should see field "([^"]*)" filled time$/) do |field|
+    nb_retry = 0
+
+    begin        
+        expect(@current_page.get_field(field).when_visible().value).to eq(dateCurrent.strftime("%H:%M"))
+    rescue RSpec::Expectations::ExpectationNotMetError
+        if nb_retry < 30
+            nb_retry = nb_retry + 1
+            sleep 1
+            retry
+        else
+            raise
+        end
+    end
+end
+
+Then(/^I should see field "([^"]*)" filled "([^"]*)"$/) do |field, value|
+    nb_retry = 0
+
+    begin        
+        expect(@current_page.get_field(field).when_visible().value).to include(Fakable.fake_if_needed(value))
+    rescue RSpec::Expectations::ExpectationNotMetError
+        if nb_retry < 30
+            nb_retry = nb_retry + 1
+            sleep 1
+            retry
+        else
+            raise
+        end
+    end
 end
