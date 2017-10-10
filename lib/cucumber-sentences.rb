@@ -411,7 +411,7 @@ end
 
 Given(/^I fill "([^"]*)" js field with "([^"]*)"$/) do |field, value|
     selector = @current_page.get_js_selector(field);
-    js = "document.querySelector('"+selector+"').value = '" +Fakable.fake_if_needed(value)+"'; document.querySelector('"+selector+"').dispatchEvent(new Event('change'));" 
+    js = "document.querySelector('"+selector+"').value = '" +Fakable.fake_if_needed(value)+"'; document.querySelector('"+selector+"').dispatchEvent(new Event('change'));"
     @browser.execute_script js
 end
 
@@ -441,7 +441,7 @@ end
 Then(/^I should see field "([^"]*)" filled date$/) do |field|
     nb_retry = 0
 
-    begin        
+    begin
         expect(@current_page.get_field(field).when_visible().value).to eq(dateCurrent.strftime("%Y-%m-%d"))
     rescue RSpec::Expectations::ExpectationNotMetError
         if nb_retry < 30
@@ -461,24 +461,8 @@ end
 Then(/^I should see field "([^"]*)" filled time$/) do |field|
     nb_retry = 0
 
-    begin        
+    begin
         expect(@current_page.get_field(field).when_visible().value).to eq(dateCurrent.strftime("%H:%M"))
-    rescue RSpec::Expectations::ExpectationNotMetError
-        if nb_retry < 30
-            nb_retry = nb_retry + 1
-            sleep 1
-            retry
-        else
-            raise
-        end
-    end
-end
-
-Then(/^I should see field "([^"]*)" filled "([^"]*)"$/) do |field, value|
-    nb_retry = 0
-
-    begin        
-        expect(@current_page.get_field(field).when_visible().value).to include(Fakable.fake_if_needed(value))
     rescue RSpec::Expectations::ExpectationNotMetError
         if nb_retry < 30
             nb_retry = nb_retry + 1

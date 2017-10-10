@@ -21,6 +21,13 @@ require "cucumber-sentences"
 
 That's all !
 
+## Publish
+
+```
+gem build cucumber-sentences.gemspec
+gem push cucumber-sentences-VERSION.gem
+```
+
 ## Sentences included
 
 ### Pages manipulation
