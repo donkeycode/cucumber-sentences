@@ -214,9 +214,9 @@ Then(/^I can see "([^"]*)" in element "([^"]*)"(| exactly)$/) do | text, dom_ele
 
     begin
         if exactly == ' exactly'
-            expect(@current_page.get_element_by_name(dom_element_name).when_visible().text).to eq(text)
+            expect(@current_page.get_element_by_name(dom_element_name).when_visible().text).to eq(Fakable.fake_if_needed(text))
         end
-        expect(@current_page.get_element_by_name(dom_element_name).when_visible().text.downcase).to include(text.downcase)
+        expect(@current_page.get_element_by_name(dom_element_name).when_visible().text.downcase).to include(Fakable.fake_if_needed(text).downcase)
     rescue RSpec::Expectations::ExpectationNotMetError
         if nb_retry < 30
             nb_retry = nb_retry + 1
