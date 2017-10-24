@@ -247,7 +247,7 @@ Then(/^I can see "([^"]*)" in element "([^"]*)"(| exactly)$/) do | text, dom_ele
 end
 
 Then(/^I can see "([^"]*)" in input "([^"]*)"$/) do | value, input |
-    expect(@current_page.get_field(input).when_visible().value).to include(value)
+    expect(@current_page.get_field(input).when_visible().value).to include(Fakable.fake_if_needed(value))
 end
 
 Then(/^I should not see a message tell me "([^"]*)"$/) do | text |
