@@ -138,7 +138,7 @@ Given(/^I can see the value "([^"]*)" selected in the select box "([^"]*)"$/) do
     nb_retry = 0
 
     begin
-        expect(@current_page.get_field(field).when_visible().selected_options()).to include(value)
+        expect(@current_page.get_field(field).when_visible().selected_options()).to include(Fakable.fake_if_needed(value))
     rescue Watir::Exception::NoValueFoundException
         if nb_retry < 30
             nb_retry = nb_retry + 1
