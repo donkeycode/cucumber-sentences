@@ -481,14 +481,18 @@ class Fakable
 	@@memorized_strings = {}
 
 	def self.fake_if_needed(value)
-		regexp = /@\('(.+)', '(.+)', '(.+)'\)/;
-		parts = value.scan(regexp)
-
+		regexp = /@\('([^\']+)', '([^\']+)', '([^\']+)'\)/;
+        parts = value.scan(regexp)
+        
 		if 0 == parts.length
 			return value
-		end
-
-		value.gsub(regexp, Fakable.fake(parts[0][0], parts[0][1], parts[0][2]))
+        end
+        
+        parts.each { | part |
+            value = value.gsub("@('#{part[0]}', '#{part[1]}', '#{part[2]}')", Fakable.fake(part[0], part[1], part[2]))
+        }
+        
+        return value
 	end
 
 	def self.fake(category, type, mem)
