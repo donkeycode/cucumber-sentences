@@ -1,3 +1,17 @@
+# Chrome reports a node detached by a page reload as an unknown error; Watir waits out a stale element, so it is raised as one.
+module CucumberSentences
+    module DetachedNodeIsStale
+        def error
+            ex = super
+            return ex unless ex.is_a?(Selenium::WebDriver::Error::UnknownError) && ex.message.include?('does not belong to the document')
+
+            Selenium::WebDriver::Error::StaleElementReferenceError.new(ex.message)
+        end
+    end
+end
+
+Selenium::WebDriver::Remote::Response.prepend(CucumberSentences::DetachedNodeIsStale)
+
 Given(/^I am on the "([^"]*)"$/) do | page_name |
     object = {
         'site_url' => $site_url
